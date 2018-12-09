@@ -26,7 +26,7 @@ $ curl https://raw.githubusercontent.com/schickling/docker-hook/master/docker-ho
 #### Start `docker-hook`
 
 ```sh
-$ docker-hook -t <auth-token> -c <command>
+$ docker-hook -b <branch> -t <auth-token> -c <command>
 ```
 
 ##### Auth-Token

@@ -40,9 +40,24 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Check if the secret URL was called
         token = args.token or os.environ.get("DOCKER_AUTH_TOKEN")
         if token == self.path[1:]:
-            logging.info("Start executing '%s'" % args.cmd)
+            logging.info("Got update")
             try:
-                Popen(args.cmd, env=env).wait()
+                branch = args.branch
+                needExec = False
+                updateBranch = json_params['ref']
+                logging.info("Branch is '%s'" % updateBranch)
+                if branch != 'all':
+                    branch = 'refs/heads/' + branch
+                    if updateBranch == branch:
+                        needExec = True
+                else:
+                    needExec = True
+                if needExec:
+                    logging.info("Start executing '%s'" % args.cmd)
+                    Popen(args.cmd, env=env).wait()
+                else:
+                    logging.info("Branch is not '%s'" %  args.branch)
+
                 self.send_response(200, "OK")
                 if 'callback_url' in json_params:
                     # Make a callback to Docker Hub
@@ -89,6 +104,10 @@ def get_parser():
                         dest="addr",
                         default="0.0.0.0",
                         help="address where it listens")
+    parser.add_argument("-b",
+                        dest="branch",
+                        default="master",
+                        help="set trigger branch, all for all commit")
     parser.add_argument("--port",
                         dest="port",
                         type=int,
