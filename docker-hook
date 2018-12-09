@@ -57,8 +57,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                     Popen(args.cmd, env=env).wait()
                 else:
                     logging.info("Branch is not '%s'" %  args.branch)
-
-                self.send_response(200, "OK")
+                if args.show:
+                    data = {"exec": needExec, "success": True}
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps(data))
+                else:
+                    self.send_response(200, "OK")
                 if 'callback_url' in json_params:
                     # Make a callback to Docker Hub
                     data = {'state': 'success'}
@@ -68,7 +74,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                                   data=json.dumps(data),
                                   headers=headers)
             except OSError as err:
-                self.send_response(500, "OSError")
+                if args.show:
+                    data = {"exec": needExec, "success": False, "error": str(err)}
+                    self.send_response(500)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps(data))
+                else:
+                    self.send_response(500, "OSError")
                 logging.error("You probably didn't use 'sh ./script.sh'.")
                 logging.error(err)
                 if 'callback_url' in json_params:
@@ -108,6 +121,11 @@ def get_parser():
                         dest="branch",
                         default="master",
                         help="set trigger branch, all for all commit")
+    parser.add_argument("-s",
+                        dest="show",
+                        default="True",
+                        type=bool,
+                        help="Whether response detail to github")
     parser.add_argument("--port",
                         dest="port",
                         type=int,

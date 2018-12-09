@@ -26,7 +26,7 @@ $ curl https://raw.githubusercontent.com/schickling/docker-hook/master/docker-ho
 #### Start `docker-hook`
 
 ```sh
-$ docker-hook -t <auth-token> -c <command> -b <branch>
+$ docker-hook -t <auth-token> -c <command> -b <branch> -s <true|false>
 ```
 
 ##### Auth-Token
@@ -40,6 +40,10 @@ The `command` can be any bash command of your choice. See the following [example
 ##### Branch
 
 `branch` is the branch from github, only when the branch event will trigger `command`. `all` for all branch.
+
+##### Show
+
+`-s` is whether response status to github
 
 ### 2. Configuration On Docker Hub
 
